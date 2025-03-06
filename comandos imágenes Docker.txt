@@ -1,0 +1,76 @@
+comandos imágenes Docker 
+Docker images -> listado de imágenes dentro de mi Docker 
+Docker pull "nombre del la imagen (openjdk: 17-jdk)" descargar
+docker image rm "nombre del la imagen (openjdk: 17-jdk)" eliminar 
+
+comando contenedores Docker 
+docker container create "nombre del la imagen (openjdk: 17-jdk)"
+"debemos guardar el id que se genera porque sera el id que utilizaremos para correr el contenedor"
+docker start id -> ejecuta el contenedor 
+docker ps -> muestra el id container y otras caracterista de nuestros container en ejecucion  
+docker stop container id -> detener el container
+docker ps -a -> muestra los ids containers y otras caracterista de nuestros containers aunque no se esten ejecutando
+docker rm name_container -> elimina el container, lo podemos hacer con el id o con el nombre random que le otorga docker a nuestro container el cual podemos ver con el comando docker ps -a 
+docker container create --name "nombreAsignar" imagen -> aqui podemos asignarle el nombre que deseamos asignarle a nuestro contenedor y en base a que imagen queremos que lo cree 
+
+
+
+Port Mapping 
+Con esto podemos decirle en que contener se va ejecutar nuestra solicitud 
+desde nuestra maquina local 
+dcoker create -p"puertoMaquinaLocal:puerto a mapear" --name "nombreAsignar" imagen
+
+Docker logs  name_container -> para saber si se ejecuto bien
+Docker logs --follow name_container  -> se queda escuchando por si se ejecutan mas logs 
+
+Docker run -> crea una imagen, crea un contenedor y luego inicia el contenedor y nos manda los logs en modo follow 
+ 
+Docker run -d imagen , hace los mismo de Docker run pero en modo dettachet
+también podemos utilizar todos los comadnos que usamos en créate con el comando Docker run 
+Ej: 
+Docker run --name "container_name" -p"puertoMaquinaLocal:puerto a mapear" -d imagen 
+
+Creamos el archivo Dockerfile 
+en nuestro ide creamos este archivo que debe tener el nombre siempre iniciando con D y además que este en la raíz de nuestro proyecto 
+
+Comando Docker network ls -> arroja una lista de todas las redes disponibles que posee Docker 
+
+crear nuestra propia red 
+comando-> Docker network créate "name_red" 
+eliminar comando -> Docker network rm "name_red" 
+
+Como se comunican los container, los mismo siempre que están dentro de una misma red se comunican a través de los nombres de los contenedores
+
+le indico donde se encuentra nuestra app 
+Docker build -t miapp:1 .(el punto de le dice que es donde se encuentra)
+indicar que los contenedores que creamos están asosciados a una red en especifico 
+
+
+
+Docker Compose 
+siempre se crea en el editor de texto un archivo que debe llamarse 
+docker-compose.yml
+archivos yml -> es un lenguaje para configuraciones 
+comando Docker compose 
+Docker compose up 
+control + c detiene todo 
+
+
+Docker compose down elimina tanto las imagens como los container que creo 
+
+Los volums nos permite que cuando eliminemos un container no se elimine toda la información que este contenga, por ejemplo si queremos persistir una base de datos, entonces, podemos hacer que se guarden los datos en una carpeta en el sistema operativo anfitrión
+También cuando desarrollamos aplicaciones desde Docker 
+Existe 3 tipos de volumes 
+anónimos -> no se pueden referencias para que otros container los usen 
+anfitrión o de Host -> este de deja donde y como se va llamar la carpeta 
+Nombrado -> es igual que el anónimo solo que este si puede luego ser referenciado 
+
+volumes defaults database 
+mongo /data/db 
+MySQL /var/lib/MySQL 
+postgres /var/lib/PostgreSQL/data 
+en caso de necesitar más es solo buscar en el navegador where does db store data
+
+ 
+Para ambientes de desarrollo y poder agilizar el desarrollo 
+para que detecte creamos otro archivo que se llama Dockerfile.dev
