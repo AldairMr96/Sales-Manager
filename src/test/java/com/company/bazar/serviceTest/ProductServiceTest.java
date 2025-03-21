@@ -4,6 +4,7 @@ import com.company.bazar.model.Client;
 import com.company.bazar.model.Product;
 import com.company.bazar.repository.IProductRepository;
 import com.company.bazar.service.ProductService;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -36,9 +37,14 @@ public class ProductServiceTest {
         Product product = new Product(1L, "TV", 700.0, 7L, new ArrayList<>());
 
         when(productRepository.save(any())).thenReturn((product));
-        productService.createProduct(product);
+        Product result = productService.createProduct(product);
 
         verify(productRepository, times(1)).save(product);
+        assertTrue(result.getSaleList().isEmpty());
+        assertEquals(result.getCodProduct(), product.getCodProduct());
+        assertEquals(result.getNameProduct(), product.getNameProduct());
+        assertEquals(result.getCost(), product.getCost());
+        assertEquals(result.getStock(), product.getStock());
     }
     @Test
     public void getProductErrorTest (){
@@ -93,14 +99,35 @@ public class ProductServiceTest {
     }
 
     @Test
-    public void editProductTest (){
-        Product product = new Product(1L, "TV", 700.0, 7L, new ArrayList<>());
+    public void editProductErrorTest (){
+        Product product = new Product();
 
-        when(productRepository.save(any())).thenReturn((product));
+        when(productRepository.findById(any())).thenThrow(new EntityNotFoundException("Product not found"));
 
-        productService.editProduct(product);
+        assertThrows(EntityNotFoundException.class, ()-> productService.editProduct(product));
 
-        verify(productRepository, times(1)).save(product);
+        verify(productRepository, times(1)).findById(any());
+        verify(productRepository, times(0)).save(product);
+    }
+
+    @Test
+    public void editProductSuccessTest (){
+      Long idTest =1L;
+      Product existProduct = new Product(idTest, "TV", 700.0, 7L, new ArrayList<>());
+      Product updateProduct = new Product(idTest, "TV", 700.0, 3L, new ArrayList<>());
+
+      when(productRepository.findById(idTest)).thenReturn(Optional.of(existProduct));
+      when(productRepository.save(existProduct)).thenReturn(updateProduct);
+
+      Product result = productService.editProduct(existProduct);
+
+      assertTrue(result.getSaleList().isEmpty());
+      assertEquals(result.getCodProduct(), updateProduct.getCodProduct());
+      assertEquals(result.getNameProduct(), updateProduct.getNameProduct());
+      assertEquals(result.getCost(), updateProduct.getCost());
+      assertEquals(result.getStock(), updateProduct.getStock());
+      verify(productRepository, times(1)).findById(idTest);
+      verify(productRepository, times(1)).save(existProduct);
     }
 
     @Test

@@ -137,7 +137,8 @@ public class SaleControllerTest {
                 new ProductSaleDTO(2L, 3));
 
         CreateSaleDTO saleDTO = new CreateSaleDTO(client.getIdClient(), productSaleDTOS);
-        doNothing().when(saleService).createSale(saleDTO);
+
+        //when(saleService.createSale(saleDTO)).thenReturn((Sale)saleDTO);
 
         ResponseEntity<?> saleResult = saleController.createSale(saleDTO);
         assertNotNull(saleResult);
@@ -227,7 +228,7 @@ public class SaleControllerTest {
 
 
         when(saleService.findSale(client.getIdClient())).thenReturn(newSale);
-        doNothing().when(saleService).editSale(saleDTO);
+        when(saleService.editSale(saleDTO)).thenReturn(newSale);
 
 
         ResponseEntity<?> response = saleController.editSale(saleDTO);

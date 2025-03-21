@@ -35,7 +35,7 @@ public class ProductControllerTest {
         List<SaleProduct> saleProducts = new ArrayList<>();
         Product product = new Product(1L, "TV", 120.0, 8L, saleProducts);
 
-        doNothing().when(productService).createProduct(product);
+        when(productService.createProduct(product)).thenReturn(product);
 
         Product productResult = productController.createProduct(product);
 
@@ -113,7 +113,7 @@ public class ProductControllerTest {
         Product product = new Product(1L, "TV", 120.0, 8L, saleProducts);
 
 
-        doNothing().when(productService).editProduct(product);
+        when(productService.editProduct(product)).thenReturn(product);
 
 
         ResponseEntity<?> response = productController.editProduct(product);

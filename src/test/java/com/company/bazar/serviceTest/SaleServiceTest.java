@@ -13,6 +13,7 @@ import com.company.bazar.repository.IProductRepository;
 import com.company.bazar.repository.ISaleProductRepository;
 import com.company.bazar.repository.ISaleRepository;
 import com.company.bazar.service.SaleService;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -126,14 +127,44 @@ public class SaleServiceTest {
     }
 
     @Test
-    public void createSaleErrorTest (){
+    public void createSaleClientNotFoundrTest (){
+
         CreateSaleDTO sale = new CreateSaleDTO();
+        Client client = new Client();
 
-        when (clientRepository.findById(any())).thenReturn(null);
+        when (clientRepository.findById(any())).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, ()->this.saleService.createSale(sale));
+        assertThrows(EntityNotFoundException.class, ()->this.saleService.createSale(sale));
         verify(saleProductRepository, never()).save(any());
         verify(saleRepository, never()).save(any());
+        verify(productRepository, never()).save(any());
+        verify(clientRepository, times(1)).findById(any());
+        verify(productRepository, never()).findById(any());
+
+
+    }
+    @Test
+    public void createSaleProductNotFoundrTest (){
+        CreateSaleDTO saleDTO = new CreateSaleDTO();
+        saleDTO.setIdClient(1L);
+        List<ProductSaleDTO> productList = new ArrayList<>();
+        productList.add(new ProductSaleDTO(1L, 2));
+        saleDTO.setProductList(productList);
+
+        Client client = new Client();
+        Sale sale = new Sale();
+        when (clientRepository.findById(any())).thenReturn(Optional.of(client));
+        when(saleRepository.save(any())).thenReturn(sale);
+        when (productRepository.findById(any())).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, ()->this.saleService.createSale(saleDTO));
+
+        verify(clientRepository, times(1)).findById(any());
+        verify(saleRepository, times(1)).save(any());
+        verify(productRepository, times(1)).findById(any());
+        verify(saleProductRepository, never()).save(any());
+        verify(productRepository, never()).save(any());
+
     }
     @Test
     public void crateSaleTest (){
@@ -287,22 +318,31 @@ public class SaleServiceTest {
 
         CreateSaleDTO saleDTO = new CreateSaleDTO(client.getIdClient(), productSaleDTOS);
         Sale newSale = new Sale(1L,LocalDate.now(), client, saleProducts,10000.0);
-        when(productRepository.findById(anyLong())).thenReturn(Optional.of(product));
-        when(saleRepository.save(any(Sale.class))).thenReturn(newSale);
 
-        saleService.editSale(saleDTO);
+        when(productRepository.findById(anyLong())).thenReturn(Optional.of(product));
+        when(saleRepository.findById(anyLong())).thenReturn(Optional.of(newSale));
+        when(saleRepository.save(any())).thenReturn(newSale);
+
+        Sale result = saleService.editSale(saleDTO);
 
         verify(saleRepository, times(2)).save(any());
+        verify(saleRepository, times(1)).findById(anyLong());
+        assertEquals(result.getCodSale(), newSale.getCodSale());
+        assertEquals(result.getSaleDate(), newSale.getSaleDate());
+        assertInstanceOf(Client.class, result.getClient());
 
     }
     @Test
     public void editSaleErrorTest (){
-        when(saleRepository.findById(any())).thenReturn(Optional.empty());
         CreateSaleDTO createSaleDTO = new CreateSaleDTO();
 
-        assertThrows(RuntimeException.class, () -> {
+        when(saleRepository.findById(any())).thenThrow(new EntityNotFoundException("Client not found"));
+
+
+        assertThrows(EntityNotFoundException.class, () -> {
             saleService.editSale(createSaleDTO);
         });
         verify(saleRepository,never()).save(any());
+        verify(saleRepository, times(1)).findById(any());
     }
 }

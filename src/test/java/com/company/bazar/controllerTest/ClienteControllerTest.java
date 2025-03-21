@@ -38,7 +38,7 @@ public class ClienteControllerTest {
         Client client = new Client(1L, "Aldair", "Martinez", "123456789", new ArrayList<>());
 
         // configure mock test Services
-        doNothing().when(clientService).createCLient(client);
+        when(clientService.createCLient(any())).thenReturn(client);
 
         //Run the method to be tested
         Client result = clientController.createClient(client);
@@ -52,6 +52,7 @@ public class ClienteControllerTest {
         assertEquals(client.getNameClient(), result.getNameClient());
         assertEquals(client.getLastnameClient(), result.getLastnameClient());
         assertEquals(client.getDni(), result.getDni());
+        assertTrue(result.getSales().isEmpty());
     }
 
     @Test
@@ -162,7 +163,7 @@ public class ClienteControllerTest {
 
 
 
-        doNothing().when(clientService).editClient(client);
+        when(clientService.editClient(client)).thenReturn(client);
 
 
         ResponseEntity<?> response = clientController.editClient(client);
